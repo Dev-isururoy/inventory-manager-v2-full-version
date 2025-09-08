@@ -1,9 +1,30 @@
-/* src/index.css - small baseline styles */
+/* src/index.css - baseline styles */
 html, body, #root {
   height: 100%;
-}
-body {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background: #f7fafc;
+  background: #f7fafc; /* light background for the app */
+}
+
+/* Optional: smooth scrolling for table overflow */
+table {
+  border-collapse: collapse;
+}
+
+td, th {
+  padding: 0.5rem 0.75rem;
+}
+
+tr:hover {
+  background-color: #f1f5f9; /* light hover effect for table rows */
+}
+
+/* Modal inputs & selects styling tweak (Chakra mostly handles this) */
+input, select {
+  font-family: inherit;
+}
+
+/* Dashboard card tweaks */
+h2, h3, h4, h5, h6 {
+  margin: 0;
 }
