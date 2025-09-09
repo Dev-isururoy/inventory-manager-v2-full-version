@@ -1,5 +1,4 @@
 // src/App.js
-import { categories } from "./categories";
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,6 +32,23 @@ import {
   Spinner,
   Text,
 } from "@chakra-ui/react";
+
+// Fixed singular asset types
+export const categories = [
+  { value: "PC", label: "PC" },
+  { value: "Printer", label: "Printer" },
+  { value: "CCTV", label: "CCTV" },
+  { value: "Access Control", label: "Access Control" },
+  { value: "Access Point", label: "Access Point" },
+  { value: "IP Phone", label: "IP Phone" },
+  { value: "Analog Phone", label: "Analog Phone" },
+  { value: "Portable Hard Disk", label: "Portable Hard Disk" },
+  { value: "Pen Drive", label: "Pen Drive" },
+  { value: "NVR", label: "NVR" },
+  { value: "Server", label: "Server" },
+  { value: "Network Switch", label: "Network Switch" },
+  { value: "Other", label: "Other" },
+];
 
 const API = axios.create({ baseURL: "http://localhost:5000/api" });
 
@@ -125,7 +141,6 @@ export default function App() {
   useEffect(() => {
     fetchStats();
     fetchAssets({ page: 1 });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // debounce search/filter
@@ -136,21 +151,19 @@ export default function App() {
       fetchAssets({ page: 1, limit, search, type: filterType, status: filterStatus });
     }, 450);
     return () => clearTimeout(searchTimeoutRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, filterType, filterStatus, limit]);
 
   // page change
   useEffect(() => {
     fetchAssets({ page, limit });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   // open add modal
-  const openAddModal = () => {
+  const openAddModal = (type = "") => {
     setModalMode("add");
     setCurrentAsset({
       name: "",
-      type: "",
+      type: type || "",
       status: "Active",
       assetCode: "",
       serial: "",
@@ -166,7 +179,6 @@ export default function App() {
   // open edit modal
   const openEditModal = (asset) => {
     setModalMode("edit");
-    // ensure ipAddress and network exist on the object (avoid uncontrolled -> controlled warnings)
     setCurrentAsset({
       ...asset,
       ipAddress: asset.ipAddress ?? "",
@@ -235,7 +247,16 @@ export default function App() {
         <VStack align="stretch" spacing={6}>
           <Heading size="lg">IT DEPARTMENT ASSETS MANAGEMENT SYSTEM</Heading>
 
-          {/* Dashboard cards */}
+          {/* Quick Action Buttons */}
+          <HStack spacing={3} wrap="wrap" pt={4}>
+            {["PC", "Printer", "CCTV", "Access Control", "Access Point"].map((type) => (
+              <Button key={type} colorScheme="blue" borderRadius="xl" onClick={() => openAddModal(type)}>
+                Add {type}
+              </Button>
+            ))}
+          </HStack>
+
+          {/* Stats */}
           <HStack spacing={4} wrap="wrap">
             <Box bg="blue.50" p={4} borderRadius="2xl" boxShadow="md" minW="140px" textAlign="center">
               <Text fontSize="sm">Total</Text>
@@ -269,12 +290,7 @@ export default function App() {
               onChange={(e) => setSearch(e.target.value)}
               minW="220px"
             />
-            <Select
-              borderRadius="xl"
-              placeholder="Filter by type"
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-            >
+            <Select borderRadius="xl" placeholder="Filter by type" value={filterType} onChange={(e) => setFilterType(e.target.value)}>
               <option value="">All</option>
               {categories.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -282,42 +298,22 @@ export default function App() {
                 </option>
               ))}
             </Select>
-            <Select
-              borderRadius="xl"
-              placeholder="Filter by status"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
+            <Select borderRadius="xl" placeholder="Filter by status" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
               <option value="">All</option>
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </Select>
-
             <HStack>
-              <Button colorScheme="blue" size="sm" borderRadius="xl" onClick={openAddModal}>
+              <Button colorScheme="blue" size="sm" borderRadius="xl" onClick={() => openAddModal()}>
                 Add Asset
               </Button>
-              <Button
-                size="sm"
-                borderRadius="xl"
-                onClick={() => {
-                  setPage(1);
-                  fetchAssets({ page: 1, limit });
-                }}
-              >
+              <Button size="sm" borderRadius="xl" onClick={() => fetchAssets({ page: 1, limit })}>
                 Refresh
               </Button>
             </HStack>
-
             <Box ml="auto" display="flex" alignItems="center" gap={2}>
               <Text fontSize="sm">Rows</Text>
-              <Select
-                value={limit}
-                onChange={(e) => setLimit(parseInt(e.target.value))}
-                size="sm"
-                width="80px"
-                borderRadius="xl"
-              >
+              <Select value={limit} onChange={(e) => setLimit(parseInt(e.target.value))} size="sm" width="80px" borderRadius="xl">
                 <option value={5}>5</option>
                 <option value={10}>10</option>
                 <option value={20}>20</option>
@@ -352,52 +348,33 @@ export default function App() {
                 </Thead>
                 <Tbody>
                   <AnimatePresence>
-                    {assets.map((asset, i) => {
-                      const cat = categories.find((c) => c.value === asset.type);
-                      const Icon = cat?.icon;
-                      return (
-                        <motion.tr
-                          key={asset._id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: 10 }}
-                          transition={{ duration: 0.18 }}
-                        >
-                          <Td>{(page - 1) * limit + (i + 1)}</Td>
-                          <Td>{asset.assetCode}</Td>
-                          <Td>{asset.name}</Td>
-                          <Td>
-                            {Icon && <Icon size={14} style={{ display: "inline-block", marginRight: 6 }} />}
-                            {cat?.label || asset.type}
-                          </Td>
-                          <Td>{asset.serial}</Td>
-                          <Td>{asset.department}</Td>
-                          <Td>{asset.assignedTo}</Td>
-                          <Td>{asset.location}</Td>
-                          <Td>{asset.ipAddress}</Td>
-                          <Td>{asset.network}</Td>
-                          <Td>
-                            <Badge colorScheme={asset.status === "Active" ? "green" : "red"}>{asset.status}</Badge>
-                          </Td>
-                          <Td>
-                            <HStack>
-                              <Button size="xs" colorScheme="yellow" borderRadius="xl" onClick={() => openEditModal(asset)}>
-                                Edit
-                              </Button>
-                              <Button
-                                size="xs"
-                                colorScheme="red"
-                                borderRadius="xl"
-                                isLoading={deletingId === asset._id}
-                                onClick={() => handleDelete(asset._id)}
-                              >
-                                Delete
-                              </Button>
-                            </HStack>
-                          </Td>
-                        </motion.tr>
-                      );
-                    })}
+                    {assets.map((asset, i) => (
+                      <motion.tr key={asset._id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.18 }}>
+                        <Td>{(page - 1) * limit + (i + 1)}</Td>
+                        <Td>{asset.assetCode}</Td>
+                        <Td>{asset.name}</Td>
+                        <Td>{asset.type}</Td>
+                        <Td>{asset.serial}</Td>
+                        <Td>{asset.department}</Td>
+                        <Td>{asset.assignedTo}</Td>
+                        <Td>{asset.location}</Td>
+                        <Td>{asset.ipAddress}</Td>
+                        <Td>{asset.network}</Td>
+                        <Td>
+                          <Badge colorScheme={asset.status === "Active" ? "green" : "red"}>{asset.status}</Badge>
+                        </Td>
+                        <Td>
+                          <HStack>
+                            <Button size="xs" colorScheme="yellow" borderRadius="xl" onClick={() => openEditModal(asset)}>
+                              Edit
+                            </Button>
+                            <Button size="xs" colorScheme="red" borderRadius="xl" isLoading={deletingId === asset._id} onClick={() => handleDelete(asset._id)}>
+                              Delete
+                            </Button>
+                          </HStack>
+                        </Td>
+                      </motion.tr>
+                    ))}
                   </AnimatePresence>
                 </Tbody>
               </Table>
@@ -516,8 +493,6 @@ export default function App() {
                     onChange={(e) => setCurrentAsset({ ...currentAsset, location: e.target.value })}
                   />
                 </FormControl>
-
-                {/* New fields: IP Address & Network */}
                 <FormControl>
                   <FormLabel>IP Address</FormLabel>
                   <Input
@@ -526,7 +501,6 @@ export default function App() {
                     onChange={(e) => setCurrentAsset({ ...currentAsset, ipAddress: e.target.value })}
                   />
                 </FormControl>
-
                 <FormControl>
                   <FormLabel>Network</FormLabel>
                   <Input
