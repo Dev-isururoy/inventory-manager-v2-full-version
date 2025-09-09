@@ -1,4 +1,5 @@
 // src/App.js
+import Dashboard from "./components/Dashboard";
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
@@ -48,6 +49,10 @@ export const categories = [
   { value: "Server", label: "Server" },
   { value: "Network Switch", label: "Network Switch" },
   { value: "Other", label: "Other" },
+  { value: "NAS", label: "NAS" },
+  { value: "PBX", label: "PBX" },
+  { value: "Laptop", label: "Laptop" },
+  
 ];
 
 const API = axios.create({ baseURL: "http://localhost:5000/api" });
@@ -256,30 +261,8 @@ export default function App() {
             ))}
           </HStack>
 
-          {/* Stats Cards */}
-          <HStack spacing={4} wrap="wrap">
-            <Box bg="blue.50" p={4} borderRadius="2xl" boxShadow="md" minW="140px" textAlign="center">
-              <Text fontSize="sm">Total</Text>
-              <Heading size="md">{stats.total}</Heading>
-              <Text fontSize="xs">Assets</Text>
-            </Box>
-            <Box bg="green.50" p={4} borderRadius="2xl" boxShadow="md" minW="140px" textAlign="center">
-              <Text fontSize="sm">PCs</Text>
-              <Heading size="md">{stats.totalPCs}</Heading>
-            </Box>
-            <Box bg="orange.50" p={4} borderRadius="2xl" boxShadow="md" minW="140px" textAlign="center">
-              <Text fontSize="sm">Printers</Text>
-              <Heading size="md">{stats.totalPrinters}</Heading>
-            </Box>
-            <Box bg="purple.50" p={4} borderRadius="2xl" boxShadow="md" minW="140px" textAlign="center">
-              <Text fontSize="sm">Active</Text>
-              <Heading size="md">{stats.active}</Heading>
-            </Box>
-            <Box bg="red.50" p={4} borderRadius="2xl" boxShadow="md" minW="140px" textAlign="center">
-              <Text fontSize="sm">Inactive</Text>
-              <Heading size="md">{stats.inactive}</Heading>
-            </Box>
-          </HStack>
+          {/* Dashboard Component instead of Stats Cards */}
+          <Dashboard assets={assets} stats={stats} />
 
           {/* Controls */}
           <HStack spacing={3} wrap="wrap">
