@@ -15,11 +15,13 @@ const assetSchema = new mongoose.Schema({
       "Analog Phone",
       "Portable Hard Disk",
       "Pen Drive",
-      "Network Video Recorder (NVR)",
+      "NVR",
       "PBX",
       "Server",
       "NAS",
-      "Network Switch"
+      "Network Switch",
+      "Laptop",
+      "Laptop"
     ],
     required: true
   },
