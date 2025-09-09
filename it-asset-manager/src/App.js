@@ -125,6 +125,7 @@ export default function App() {
   useEffect(() => {
     fetchStats();
     fetchAssets({ page: 1 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // debounce search/filter
@@ -135,11 +136,13 @@ export default function App() {
       fetchAssets({ page: 1, limit, search, type: filterType, status: filterStatus });
     }, 450);
     return () => clearTimeout(searchTimeoutRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, filterType, filterStatus, limit]);
 
   // page change
   useEffect(() => {
     fetchAssets({ page, limit });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   // open add modal
@@ -154,6 +157,8 @@ export default function App() {
       department: "",
       assignedTo: "",
       location: "",
+      ipAddress: "",
+      network: "",
     });
     onOpen();
   };
@@ -161,7 +166,12 @@ export default function App() {
   // open edit modal
   const openEditModal = (asset) => {
     setModalMode("edit");
-    setCurrentAsset({ ...asset });
+    // ensure ipAddress and network exist on the object (avoid uncontrolled -> controlled warnings)
+    setCurrentAsset({
+      ...asset,
+      ipAddress: asset.ipAddress ?? "",
+      network: asset.network ?? "",
+    });
     onOpen();
   };
 
@@ -223,7 +233,7 @@ export default function App() {
     <ChakraProvider>
       <Box p={6} maxW="1200px" mx="auto" bg="gray.50" borderRadius="2xl">
         <VStack align="stretch" spacing={6}>
-          <Heading size="lg">IT DEPARTMENT ASSETS</Heading>
+          <Heading size="lg">IT DEPARTMENT ASSETS MANAGEMENT SYSTEM</Heading>
 
           {/* Dashboard cards */}
           <HStack spacing={4} wrap="wrap">
@@ -252,25 +262,62 @@ export default function App() {
 
           {/* Controls */}
           <HStack spacing={3} wrap="wrap">
-            <Input borderRadius="xl" placeholder="Search name, code, user..." value={search} onChange={(e) => setSearch(e.target.value)} minW="220px" />
-            <Select borderRadius="xl" placeholder="Filter by type" value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+            <Input
+              borderRadius="xl"
+              placeholder="Search name, code, user..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              minW="220px"
+            />
+            <Select
+              borderRadius="xl"
+              placeholder="Filter by type"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
               <option value="">All</option>
-              {categories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              {categories.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
             </Select>
-            <Select borderRadius="xl" placeholder="Filter by status" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+            <Select
+              borderRadius="xl"
+              placeholder="Filter by status"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
               <option value="">All</option>
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </Select>
 
             <HStack>
-              <Button colorScheme="blue" size="sm" borderRadius="xl" onClick={openAddModal}>Add Asset</Button>
-              <Button size="sm" borderRadius="xl" onClick={() => { setPage(1); fetchAssets({ page: 1, limit }); }}>Refresh</Button>
+              <Button colorScheme="blue" size="sm" borderRadius="xl" onClick={openAddModal}>
+                Add Asset
+              </Button>
+              <Button
+                size="sm"
+                borderRadius="xl"
+                onClick={() => {
+                  setPage(1);
+                  fetchAssets({ page: 1, limit });
+                }}
+              >
+                Refresh
+              </Button>
             </HStack>
 
             <Box ml="auto" display="flex" alignItems="center" gap={2}>
               <Text fontSize="sm">Rows</Text>
-              <Select value={limit} onChange={(e) => setLimit(parseInt(e.target.value))} size="sm" width="80px" borderRadius="xl">
+              <Select
+                value={limit}
+                onChange={(e) => setLimit(parseInt(e.target.value))}
+                size="sm"
+                width="80px"
+                borderRadius="xl"
+              >
                 <option value={5}>5</option>
                 <option value={10}>10</option>
                 <option value={20}>20</option>
@@ -282,7 +329,9 @@ export default function App() {
           {/* Table */}
           <Box bg="white" borderRadius="2xl" boxShadow="md" p={4} overflowX="auto" maxH="520px">
             {loading ? (
-              <Box textAlign="center" p={8}><Spinner size="lg" /></Box>
+              <Box textAlign="center" p={8}>
+                <Spinner size="lg" />
+              </Box>
             ) : (
               <Table variant="striped" colorScheme="gray" size="sm">
                 <Thead>
@@ -295,6 +344,8 @@ export default function App() {
                     <Th>Department</Th>
                     <Th>Assigned To</Th>
                     <Th>Location</Th>
+                    <Th>IP Address</Th>
+                    <Th>Network</Th>
                     <Th>Status</Th>
                     <Th>Actions</Th>
                   </Tr>
@@ -302,10 +353,16 @@ export default function App() {
                 <Tbody>
                   <AnimatePresence>
                     {assets.map((asset, i) => {
-                      const cat = categories.find(c => c.value === asset.type);
+                      const cat = categories.find((c) => c.value === asset.type);
                       const Icon = cat?.icon;
                       return (
-                        <motion.tr key={asset._id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.18 }}>
+                        <motion.tr
+                          key={asset._id}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ duration: 0.18 }}
+                        >
                           <Td>{(page - 1) * limit + (i + 1)}</Td>
                           <Td>{asset.assetCode}</Td>
                           <Td>{asset.name}</Td>
@@ -317,11 +374,25 @@ export default function App() {
                           <Td>{asset.department}</Td>
                           <Td>{asset.assignedTo}</Td>
                           <Td>{asset.location}</Td>
-                          <Td><Badge colorScheme={asset.status === "Active" ? "green" : "red"}>{asset.status}</Badge></Td>
+                          <Td>{asset.ipAddress}</Td>
+                          <Td>{asset.network}</Td>
+                          <Td>
+                            <Badge colorScheme={asset.status === "Active" ? "green" : "red"}>{asset.status}</Badge>
+                          </Td>
                           <Td>
                             <HStack>
-                              <Button size="xs" colorScheme="yellow" borderRadius="xl" onClick={() => openEditModal(asset)}>Edit</Button>
-                              <Button size="xs" colorScheme="red" borderRadius="xl" isLoading={deletingId === asset._id} onClick={() => handleDelete(asset._id)}>Delete</Button>
+                              <Button size="xs" colorScheme="yellow" borderRadius="xl" onClick={() => openEditModal(asset)}>
+                                Edit
+                              </Button>
+                              <Button
+                                size="xs"
+                                colorScheme="red"
+                                borderRadius="xl"
+                                isLoading={deletingId === asset._id}
+                                onClick={() => handleDelete(asset._id)}
+                              >
+                                Delete
+                              </Button>
                             </HStack>
                           </Td>
                         </motion.tr>
@@ -331,19 +402,31 @@ export default function App() {
                 </Tbody>
               </Table>
             )}
-            {(!loading && assets.length === 0) && (
-              <Box p={6} textAlign="center"><Text>No assets to show.</Text></Box>
+            {!loading && assets.length === 0 && (
+              <Box p={6} textAlign="center">
+                <Text>No assets to show.</Text>
+              </Box>
             )}
           </Box>
 
           {/* Pagination */}
           <HStack spacing={3} justify="space-between">
             <HStack>
-              <Button size="sm" borderRadius="xl" onClick={gotoFirst} isDisabled={page === 1}>First</Button>
-              <Button size="sm" borderRadius="xl" onClick={gotoPrev} isDisabled={page === 1}>Prev</Button>
-              <Text>Page {page} of {pages}</Text>
-              <Button size="sm" borderRadius="xl" onClick={gotoNext} isDisabled={page === pages}>Next</Button>
-              <Button size="sm" borderRadius="xl" onClick={gotoLast} isDisabled={page === pages}>Last</Button>
+              <Button size="sm" borderRadius="xl" onClick={gotoFirst} isDisabled={page === 1}>
+                First
+              </Button>
+              <Button size="sm" borderRadius="xl" onClick={gotoPrev} isDisabled={page === 1}>
+                Prev
+              </Button>
+              <Text>
+                Page {page} of {pages}
+              </Text>
+              <Button size="sm" borderRadius="xl" onClick={gotoNext} isDisabled={page === pages}>
+                Next
+              </Button>
+              <Button size="sm" borderRadius="xl" onClick={gotoLast} isDisabled={page === pages}>
+                Last
+              </Button>
             </HStack>
             <Text fontSize="sm">Total: {total} items</Text>
           </HStack>
@@ -359,37 +442,108 @@ export default function App() {
               <VStack spacing={3} align="stretch">
                 <FormControl isRequired>
                   <FormLabel>Asset Code</FormLabel>
-                  <Input borderRadius="xl" value={currentAsset.assetCode || ""} onChange={(e) => setCurrentAsset({ ...currentAsset, assetCode: e.target.value })} />
+                  <Input
+                    borderRadius="xl"
+                    value={currentAsset.assetCode || ""}
+                    onChange={(e) => setCurrentAsset({ ...currentAsset, assetCode: e.target.value })}
+                  />
                 </FormControl>
                 <FormControl isRequired>
                   <FormLabel>Name</FormLabel>
-                  <Input borderRadius="xl" value={currentAsset.name || ""} onChange={(e) => setCurrentAsset({ ...currentAsset, name: e.target.value })} />
+                  <Input
+                    borderRadius="xl"
+                    value={currentAsset.name || ""}
+                    onChange={(e) => setCurrentAsset({ ...currentAsset, name: e.target.value })}
+                  />
                 </FormControl>
                 <HStack spacing={3} width="100%">
                   <FormControl isRequired>
                     <FormLabel>Type</FormLabel>
-                    <Select borderRadius="xl" value={currentAsset.type || ""} onChange={(e) => setCurrentAsset({ ...currentAsset, type: e.target.value })}>
+                    <Select
+                      borderRadius="xl"
+                      value={currentAsset.type || ""}
+                      onChange={(e) => setCurrentAsset({ ...currentAsset, type: e.target.value })}
+                    >
                       <option value="">Select type</option>
-                      {categories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                      {categories.map((c) => (
+                        <option key={c.value} value={c.value}>
+                          {c.label}
+                        </option>
+                      ))}
                     </Select>
                   </FormControl>
                   <FormControl isRequired>
                     <FormLabel>Status</FormLabel>
-                    <Select borderRadius="xl" value={currentAsset.status || ""} onChange={(e) => setCurrentAsset({ ...currentAsset, status: e.target.value })}>
+                    <Select
+                      borderRadius="xl"
+                      value={currentAsset.status || ""}
+                      onChange={(e) => setCurrentAsset({ ...currentAsset, status: e.target.value })}
+                    >
                       <option value="Active">Active</option>
                       <option value="Inactive">Inactive</option>
                     </Select>
                   </FormControl>
                 </HStack>
-                <FormControl><FormLabel>Serial</FormLabel><Input borderRadius="xl" value={currentAsset.serial || ""} onChange={(e) => setCurrentAsset({ ...currentAsset, serial: e.target.value })} /></FormControl>
-                <FormControl><FormLabel>Department</FormLabel><Input borderRadius="xl" value={currentAsset.department || ""} onChange={(e) => setCurrentAsset({ ...currentAsset, department: e.target.value })} /></FormControl>
-                <FormControl><FormLabel>Assigned To</FormLabel><Input borderRadius="xl" value={currentAsset.assignedTo || ""} onChange={(e) => setCurrentAsset({ ...currentAsset, assignedTo: e.target.value })} /></FormControl>
-                <FormControl><FormLabel>Location</FormLabel><Input borderRadius="xl" value={currentAsset.location || ""} onChange={(e) => setCurrentAsset({ ...currentAsset, location: e.target.value })} /></FormControl>
+                <FormControl>
+                  <FormLabel>Serial</FormLabel>
+                  <Input
+                    borderRadius="xl"
+                    value={currentAsset.serial || ""}
+                    onChange={(e) => setCurrentAsset({ ...currentAsset, serial: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Department</FormLabel>
+                  <Input
+                    borderRadius="xl"
+                    value={currentAsset.department || ""}
+                    onChange={(e) => setCurrentAsset({ ...currentAsset, department: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Assigned To</FormLabel>
+                  <Input
+                    borderRadius="xl"
+                    value={currentAsset.assignedTo || ""}
+                    onChange={(e) => setCurrentAsset({ ...currentAsset, assignedTo: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Location</FormLabel>
+                  <Input
+                    borderRadius="xl"
+                    value={currentAsset.location || ""}
+                    onChange={(e) => setCurrentAsset({ ...currentAsset, location: e.target.value })}
+                  />
+                </FormControl>
+
+                {/* New fields: IP Address & Network */}
+                <FormControl>
+                  <FormLabel>IP Address</FormLabel>
+                  <Input
+                    borderRadius="xl"
+                    value={currentAsset.ipAddress || ""}
+                    onChange={(e) => setCurrentAsset({ ...currentAsset, ipAddress: e.target.value })}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Network</FormLabel>
+                  <Input
+                    borderRadius="xl"
+                    value={currentAsset.network || ""}
+                    onChange={(e) => setCurrentAsset({ ...currentAsset, network: e.target.value })}
+                  />
+                </FormControl>
               </VStack>
             </ModalBody>
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} onClick={handleSave} isLoading={saving} borderRadius="xl">Save</Button>
-              <Button borderRadius="xl" onClick={onClose}>Cancel</Button>
+              <Button colorScheme="blue" mr={3} onClick={handleSave} isLoading={saving} borderRadius="xl">
+                Save
+              </Button>
+              <Button borderRadius="xl" onClick={onClose}>
+                Cancel
+              </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
