@@ -243,7 +243,7 @@ export default function App() {
 
   return (
     <ChakraProvider>
-      <Box p={6} maxW="1200px" mx="auto" bg="gray.50" borderRadius="2xl">
+      <Box p={6} maxW="1500px" mx="auto" bg="gray.50" borderRadius="2xl">
         <VStack align="stretch" spacing={6}>
           <Heading size="lg">IT DEPARTMENT ASSETS MANAGEMENT SYSTEM</Heading>
 
@@ -256,7 +256,7 @@ export default function App() {
             ))}
           </HStack>
 
-          {/* Stats */}
+          {/* Stats Cards */}
           <HStack spacing={4} wrap="wrap">
             <Box bg="blue.50" p={4} borderRadius="2xl" boxShadow="md" minW="140px" textAlign="center">
               <Text fontSize="sm">Total</Text>
@@ -323,7 +323,7 @@ export default function App() {
           </HStack>
 
           {/* Table */}
-          <Box bg="white" borderRadius="2xl" boxShadow="md" p={4} overflowX="auto" maxH="520px">
+          <Box bg="white" borderRadius="2xl" boxShadow="md" p={4} overflowX="auto" width="100%">
             {loading ? (
               <Box textAlign="center" p={8}>
                 <Spinner size="lg" />
@@ -349,7 +349,13 @@ export default function App() {
                 <Tbody>
                   <AnimatePresence>
                     {assets.map((asset, i) => (
-                      <motion.tr key={asset._id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.18 }}>
+                      <motion.tr
+                        key={asset._id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
+                        transition={{ duration: 0.18 }}
+                      >
                         <Td>{(page - 1) * limit + (i + 1)}</Td>
                         <Td>{asset.assetCode}</Td>
                         <Td>{asset.name}</Td>
@@ -410,9 +416,9 @@ export default function App() {
         </VStack>
 
         {/* Modal */}
-        <Modal isOpen={isOpen} onClose={onClose} size="lg">
+        <Modal isOpen={isOpen} onClose={onClose} size="6xl">
           <ModalOverlay />
-          <ModalContent borderRadius="2xl">
+          <ModalContent borderRadius="2xl" maxW="80vw">
             <ModalHeader>{modalMode === "add" ? "Add New Asset" : "Edit Asset"}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
@@ -434,7 +440,7 @@ export default function App() {
                   />
                 </FormControl>
                 <HStack spacing={3} width="100%">
-                  <FormControl isRequired>
+                  <FormControl isRequired flex={1}>
                     <FormLabel>Type</FormLabel>
                     <Select
                       borderRadius="xl"
@@ -449,7 +455,7 @@ export default function App() {
                       ))}
                     </Select>
                   </FormControl>
-                  <FormControl isRequired>
+                  <FormControl isRequired flex={1}>
                     <FormLabel>Status</FormLabel>
                     <Select
                       borderRadius="xl"
@@ -461,54 +467,60 @@ export default function App() {
                     </Select>
                   </FormControl>
                 </HStack>
-                <FormControl>
-                  <FormLabel>Serial</FormLabel>
-                  <Input
-                    borderRadius="xl"
-                    value={currentAsset.serial || ""}
-                    onChange={(e) => setCurrentAsset({ ...currentAsset, serial: e.target.value })}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Department</FormLabel>
-                  <Input
-                    borderRadius="xl"
-                    value={currentAsset.department || ""}
-                    onChange={(e) => setCurrentAsset({ ...currentAsset, department: e.target.value })}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Assigned To</FormLabel>
-                  <Input
-                    borderRadius="xl"
-                    value={currentAsset.assignedTo || ""}
-                    onChange={(e) => setCurrentAsset({ ...currentAsset, assignedTo: e.target.value })}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Location</FormLabel>
-                  <Input
-                    borderRadius="xl"
-                    value={currentAsset.location || ""}
-                    onChange={(e) => setCurrentAsset({ ...currentAsset, location: e.target.value })}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>IP Address</FormLabel>
-                  <Input
-                    borderRadius="xl"
-                    value={currentAsset.ipAddress || ""}
-                    onChange={(e) => setCurrentAsset({ ...currentAsset, ipAddress: e.target.value })}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Network</FormLabel>
-                  <Input
-                    borderRadius="xl"
-                    value={currentAsset.network || ""}
-                    onChange={(e) => setCurrentAsset({ ...currentAsset, network: e.target.value })}
-                  />
-                </FormControl>
+                <HStack spacing={3} width="100%">
+                  <FormControl flex={1}>
+                    <FormLabel>Serial</FormLabel>
+                    <Input
+                      borderRadius="xl"
+                      value={currentAsset.serial || ""}
+                      onChange={(e) => setCurrentAsset({ ...currentAsset, serial: e.target.value })}
+                    />
+                  </FormControl>
+                  <FormControl flex={1}>
+                    <FormLabel>Department</FormLabel>
+                    <Input
+                      borderRadius="xl"
+                      value={currentAsset.department || ""}
+                      onChange={(e) => setCurrentAsset({ ...currentAsset, department: e.target.value })}
+                    />
+                  </FormControl>
+                </HStack>
+                <HStack spacing={3} width="100%">
+                  <FormControl flex={1}>
+                    <FormLabel>Assigned To</FormLabel>
+                    <Input
+                      borderRadius="xl"
+                      value={currentAsset.assignedTo || ""}
+                      onChange={(e) => setCurrentAsset({ ...currentAsset, assignedTo: e.target.value })}
+                    />
+                  </FormControl>
+                  <FormControl flex={1}>
+                    <FormLabel>Location</FormLabel>
+                    <Input
+                      borderRadius="xl"
+                      value={currentAsset.location || ""}
+                      onChange={(e) => setCurrentAsset({ ...currentAsset, location: e.target.value })}
+                    />
+                  </FormControl>
+                </HStack>
+                <HStack spacing={3} width="100%">
+                  <FormControl flex={1}>
+                    <FormLabel>IP Address</FormLabel>
+                    <Input
+                      borderRadius="xl"
+                      value={currentAsset.ipAddress || ""}
+                      onChange={(e) => setCurrentAsset({ ...currentAsset, ipAddress: e.target.value })}
+                    />
+                  </FormControl>
+                  <FormControl flex={1}>
+                    <FormLabel>Network</FormLabel>
+                    <Input
+                      borderRadius="xl"
+                      value={currentAsset.network || ""}
+                      onChange={(e) => setCurrentAsset({ ...currentAsset, network: e.target.value })}
+                    />
+                  </FormControl>
+                </HStack>
               </VStack>
             </ModalBody>
             <ModalFooter>
