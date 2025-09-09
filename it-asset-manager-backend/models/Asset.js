@@ -28,7 +28,11 @@ const assetSchema = new mongoose.Schema({
   serial: String,
   department: String,
   assignedTo: String,
-  location: String
+  location: String,
+
+  // NEW FIELDS
+  ipAddress: String,
+  network: String,
 });
 
 module.exports = mongoose.model("Asset", assetSchema);
